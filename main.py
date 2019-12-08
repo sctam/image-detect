@@ -71,7 +71,7 @@ class Window(Frame):
         self.slider_y.set(self.window_y)
         self.slider_w.set(self.window_w)
         self.slider_h.set(self.window_h)
-        
+
     def _update_image(self):
         exec_start = time.time()       
 
@@ -103,40 +103,47 @@ class Window(Frame):
         exit()
 
     def _process_image(self, root):
-        print("Test.")
-        # threading.Timer(0.8, _process_image).start()
-        # exec_start = time.time()
+        print("tick")
+        exec_start = time.time()
+        with mss.mss() as screenshot:
+            monitor = {"left": self.window_x, "top": self.window_y, "width": self.window_w, "height": self.window_h}
+            img = screenshot.grab(monitor)
 
-        # pil_img = ImageGrab.grab(bbox=(WINDOW_X, WINDOW_Y, WINDOW_X+WINDOW_W, WINDOW_Y+WINDOW_H))  # X1,Y1,X2,Y2
+        img_rgb = np.array(img) 
+        #img_rgb = img_rgb[:, :, ::-1].copy() # Convert RGB to BGR 
 
-        # # Convery PIL to CV
-        # img_rgb = np.array(pil_img) 
-        # img_rgb = img_rgb[:, :, ::-1].copy() # Convert RGB to BGR 
+        # Set up base image to look at.
+        #img_rgb  = cv2.imread('base.jpg')
+        img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
 
-        # # Set up base image to look at.
-        # #img_rgb  = cv2.imread('base.jpg')
-        # img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+        # Match.
+        res = cv2.matchTemplate(img_gray, TEMPLATE, cv2.TM_CCOEFF_NORMED)
+        threshold = 0.7
+        loc = np.where(res >= threshold)
+        for pt in zip(*loc[::-1]):
+            cv2.rectangle(img_rgb, pt, (pt[0] + TEMPLATE_W, pt[1] + TEMPLATE_H), (0, 0, 255), 2)
 
-        # # Match.
-        # res = cv2.matchTemplate(img_gray, TEMPLATE, cv2.TM_CCOEFF_NORMED)
-        # threshold = 0.8
-        # loc = np.where(res >= threshold)
-        # for pt in zip(*loc[::-1]):
-        #     cv2.rectangle(img_rgb, pt, (pt[0] + TEMPLATE_W, pt[1] + TEMPLATE_H), (0, 0, 255), 2)
-
-        # if loc[0].size > 0:
-        #     playsound(r'sounds\beep2.wav', False)
-        #     print("found")
+        if loc[0].size > 0:
+            playsound(r'sounds\beep2.wav', False)
+            print("found")
 
         # cv2.imwrite('result.png', img_rgb)
 
-        # exec_end = (time.time() - exec_start)
-        # print(exec_end)
-        root.after(2000, self._process_image, root)
+        img_rgb = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2RGB)
+
+        img = Image.fromarray(img_rgb)
+        #img = Image.frombytes('RGB', img.size, img.bgra, 'raw', 'BGRX')
+
+
+
+        img = ImageTk.PhotoImage(img)
+        self.label_image.configure(image=img)
+        self.label_image.image = img
+
+        print(time.time() - exec_start)
+        root.after(2000, self._process_image, root) # Reschedule.
 
 def main():
-    #_process_image()
-
     root = Tk()
     app = Window(root)
     root.after(2000, app._process_image, root)
