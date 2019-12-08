@@ -118,7 +118,7 @@ class Window(Frame):
 
         # Match.
         res = cv2.matchTemplate(img_gray, TEMPLATE, cv2.TM_CCOEFF_NORMED)
-        threshold = 0.7
+        threshold = 0.8
         loc = np.where(res >= threshold)
         for pt in zip(*loc[::-1]):
             cv2.rectangle(img_rgb, pt, (pt[0] + TEMPLATE_W, pt[1] + TEMPLATE_H), (0, 0, 255), 2)
@@ -133,8 +133,6 @@ class Window(Frame):
 
         img = Image.fromarray(img_rgb)
         #img = Image.frombytes('RGB', img.size, img.bgra, 'raw', 'BGRX')
-
-
 
         img = ImageTk.PhotoImage(img)
         self.label_image.configure(image=img)
