@@ -26,6 +26,8 @@ class Window(Frame):
         self.window_y = 0
         self.window_w = 240
         self.window_h = 230
+        self.detect_threshold = 0.77
+        self.alerted = False
 
         self._setup_ui()
 
@@ -43,10 +45,12 @@ class Window(Frame):
         self.label_y = Label(self.master, text="Y")
         self.label_w = Label(self.master, text="Width")
         self.label_h = Label(self.master, text="Height")
+        self.label_t = Label(self.master, text="Threshold")
         self.label_x.grid(row=0, column=0)
         self.label_y.grid(row=1, column=0)
         self.label_w.grid(row=2, column=0)
         self.label_h.grid(row=3, column=0)
+        self.label_t.grid(row=4, column=0)
         
         # Build sliders.
         limit_left   = self.monitor[0]['left']
@@ -57,10 +61,12 @@ class Window(Frame):
         self.slider_y = Scale(self.master, length=400, from_=limit_top,  to=limit_bottom, orient=HORIZONTAL, command=self._update_vars_y)
         self.slider_w = Scale(self.master, length=400, from_=1, to=1000, orient=HORIZONTAL, command=self._update_vars_w)
         self.slider_h = Scale(self.master, length=400, from_=1, to=1000, orient=HORIZONTAL, command=self._update_vars_h)
+        self.slider_t = Scale(self.master, length=400, from_=0, to=1,    orient=HORIZONTAL, command=self._update_vars_t, resolution=0.01)
         self.slider_x.grid(row=0, column=1)
         self.slider_y.grid(row=1, column=1)
         self.slider_w.grid(row=2, column=1)
         self.slider_h.grid(row=3, column=1)
+        self.slider_t.grid(row=4, column=1)
 
         # Setup label for image.
         self.label_image = Label(self.master)
@@ -71,9 +77,10 @@ class Window(Frame):
         self.slider_y.set(self.window_y)
         self.slider_w.set(self.window_w)
         self.slider_h.set(self.window_h)
+        self.slider_t.set(self.detect_threshold)
 
     def _update_image(self):
-        exec_start = time.time()       
+        # exec_start = time.time()       
 
         with mss.mss() as screenshot:
             monitor = {"left": self.window_x, "top": self.window_y, "width": self.window_w, "height": self.window_h}
@@ -83,7 +90,7 @@ class Window(Frame):
             self.label_image.configure(image=img)
             self.label_image.image = img
 
-        print(time.time() - exec_start) # Time critical component.
+        # print(time.time() - exec_start) # Time critical component.
 
 
     def _update_vars_x(self, value):
@@ -98,53 +105,54 @@ class Window(Frame):
     def _update_vars_h(self, value):
         self.window_h = int(value)
         self._update_image()
+    def _update_vars_t(self, value):
+        self.window_t = float(value)
     
     def _exit_program(self):
         exit()
 
     def _process_image(self, root):
-        print("tick")
-        exec_start = time.time()
+        # exec_start = time.time()
         with mss.mss() as screenshot:
             monitor = {"left": self.window_x, "top": self.window_y, "width": self.window_w, "height": self.window_h}
             img = screenshot.grab(monitor)
 
         img_rgb = np.array(img) 
-        #img_rgb = img_rgb[:, :, ::-1].copy() # Convert RGB to BGR 
 
         # Set up base image to look at.
-        #img_rgb  = cv2.imread('base.jpg')
         img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
 
         # Match.
         res = cv2.matchTemplate(img_gray, TEMPLATE, cv2.TM_CCOEFF_NORMED)
-        threshold = 0.8
+        threshold = self.window_t
         loc = np.where(res >= threshold)
         for pt in zip(*loc[::-1]):
             cv2.rectangle(img_rgb, pt, (pt[0] + TEMPLATE_W, pt[1] + TEMPLATE_H), (0, 0, 255), 2)
 
         if loc[0].size > 0:
-            playsound(r'sounds\beep2.wav', False)
-            print("found")
+            if not self.alerted:
+                self.alerted = True
+                playsound(r'sounds\beep2.wav', False)
+        else:
+            self.alerted = False
 
+        # Uncomment to capture ot file.
         # cv2.imwrite('result.png', img_rgb)
 
         img_rgb = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2RGB)
 
         img = Image.fromarray(img_rgb)
-        #img = Image.frombytes('RGB', img.size, img.bgra, 'raw', 'BGRX')
-
         img = ImageTk.PhotoImage(img)
         self.label_image.configure(image=img)
         self.label_image.image = img
 
-        print(time.time() - exec_start)
-        root.after(2000, self._process_image, root) # Reschedule.
+        # print(time.time() - exec_start)
+        root.after(250, self._process_image, root) # Reschedule.
 
 def main():
     root = Tk()
     app = Window(root)
-    root.after(2000, app._process_image, root)
+    root.after(250, app._process_image, root)
 
     root.mainloop()  
 
