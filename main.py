@@ -1,14 +1,10 @@
 import time
-import threading
 import cv2
 import numpy as np
 import mss
-import mss.tools
 import pyscreenshot as ImageGrab
-from matplotlib import pyplot as plt
 from playsound import playsound
 from tkinter import *
-
 from PIL import Image, ImageTk
 
 # Set up thing to look for.
