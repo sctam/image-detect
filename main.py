@@ -22,7 +22,7 @@ class Window(Frame):
         self.window_y = 0
         self.window_w = 240
         self.window_h = 230
-        self.detect_threshold = 0.77
+        self.window_t = 0.77
         self.alerted = False
 
         self._setup_ui()
@@ -73,7 +73,7 @@ class Window(Frame):
         self.slider_y.set(self.window_y)
         self.slider_w.set(self.window_w)
         self.slider_h.set(self.window_h)
-        self.slider_t.set(self.detect_threshold)
+        self.slider_t.set(self.window_t)
 
     def _update_image(self):
         # exec_start = time.time()       
@@ -87,7 +87,6 @@ class Window(Frame):
             self.label_image.image = img
 
         # print(time.time() - exec_start) # Time critical component.
-
 
     def _update_vars_x(self, value):
         self.window_x = int(value)
@@ -107,7 +106,7 @@ class Window(Frame):
     def _exit_program(self):
         exit()
 
-    def _process_image(self, root):
+    def _process_image(self, root, delay):
         # exec_start = time.time()
         with mss.mss() as screenshot:
             monitor = {"left": self.window_x, "top": self.window_y, "width": self.window_w, "height": self.window_h}
@@ -143,12 +142,13 @@ class Window(Frame):
         self.label_image.image = img
 
         # print(time.time() - exec_start)
-        root.after(250, self._process_image, root) # Reschedule.
+        root.after(delay, self._process_image, root, delay) # Reschedule.
 
 def main():
     root = Tk()
     app = Window(root)
-    root.after(250, app._process_image, root)
+    timeout = 50 # Refresh delay in ms.
+    root.after(timeout, app._process_image, root, timeout)
 
     root.mainloop()  
 
