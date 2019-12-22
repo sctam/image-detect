@@ -130,7 +130,7 @@ class Window(Frame):
         if loc[0].size > 0:
             if not self.alerted:
                 self.alerted = True
-                playsound(r'sounds\beep2.wav', False)
+                playsound(r'sounds\beep.wav', False)
         else:
             self.alerted = False
 
