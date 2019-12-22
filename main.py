@@ -8,8 +8,9 @@ from tkinter import *
 from PIL import Image, ImageTk
 
 # Set up thing to look for.
-TEMPLATE = cv2.imread(r'images\dot.jpg', 0)
-TEMPLATE_W, TEMPLATE_H = TEMPLATE.shape[::-1]
+REFERENCE_PATH = r'images\reference.jpg'
+REFERENCE_IMG = cv2.imread(REFERENCE_PATH, 0)
+REFERENCE_W, REFERENCE_H = REFERENCE_IMG.shape[::-1]
 
 class Window(Frame):
     def __init__(self, master=None):
@@ -28,7 +29,7 @@ class Window(Frame):
         self._setup_ui()
 
     def _setup_ui(self):
-        self.master.title("Gather Sounds")
+        self.master.title("Image Detect")
         # Build menus.
         menu = Menu(self.master)
         self.master.config(menu=menu) # Add menu up top.
@@ -42,11 +43,13 @@ class Window(Frame):
         self.label_w = Label(self.master, text="Width")
         self.label_h = Label(self.master, text="Height")
         self.label_t = Label(self.master, text="Threshold")
+        self.label_i = Label(self.master, text="Searching for image at '{}'".format(REFERENCE_PATH))
         self.label_x.grid(row=0, column=0)
         self.label_y.grid(row=1, column=0)
         self.label_w.grid(row=2, column=0)
         self.label_h.grid(row=3, column=0)
         self.label_t.grid(row=4, column=0)
+        self.label_i.grid(row=5, column=0, columnspan=2, ipadx=0, ipady=0, padx=0, pady=0)
         
         # Build sliders.
         limit_left   = self.monitor[0]['left']
@@ -118,11 +121,11 @@ class Window(Frame):
         img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
 
         # Match.
-        res = cv2.matchTemplate(img_gray, TEMPLATE, cv2.TM_CCOEFF_NORMED)
+        res = cv2.matchTemplate(img_gray, REFERENCE_IMG, cv2.TM_CCOEFF_NORMED)
         threshold = self.window_t
         loc = np.where(res >= threshold)
         for pt in zip(*loc[::-1]):
-            cv2.rectangle(img_rgb, pt, (pt[0] + TEMPLATE_W, pt[1] + TEMPLATE_H), (0, 0, 255), 2)
+            cv2.rectangle(img_rgb, pt, (pt[0] + REFERENCE_W, pt[1] + REFERENCE_H), (0, 0, 255), 2)
 
         if loc[0].size > 0:
             if not self.alerted:
