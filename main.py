@@ -2,13 +2,12 @@ import time
 import cv2
 import numpy as np
 import mss
-import pyscreenshot as ImageGrab
 from playsound import playsound
 from tkinter import *
 from PIL import Image, ImageTk
 
 # Set up thing to look for.
-REFERENCE_PATH = r'images\reference.jpg'
+REFERENCE_PATH = r'reference.jpg'
 REFERENCE_IMG = cv2.imread(REFERENCE_PATH, 0)
 REFERENCE_W, REFERENCE_H = REFERENCE_IMG.shape[::-1]
 
@@ -130,7 +129,7 @@ class Window(Frame):
         if loc[0].size > 0:
             if not self.alerted:
                 self.alerted = True
-                playsound(r'sounds\beep.wav', False)
+                playsound(r'beep.wav', False)
         else:
             self.alerted = False
 
