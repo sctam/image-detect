@@ -1,11 +1,15 @@
 # Image Detect
 ## Background
-This application plays a sound and highlight it when it has detected a reference image (`reference.jpg`) in the image that is being scanned. The application performs a simple screenshot poll to scan the image.
+This application plays a sound and highlights it when it has detected a reference image (`reference.jpg`) in the image that is being scanned. The application performs a simple screenshot poll to scan the image.
 
 ## Example Usage
-One could detect the following gem in a game of Bejeweled.
+One could use this to detect a gem in a game of Bejeweled.
+
+If using this as a reference image,
 
 ![Reference Image](example/reference.jpg)
+
+The following will be highlighted and a sound would be played,
 
 ![Scanned Image](example/matchedExample.jpg)
 
