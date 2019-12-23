@@ -1,19 +1,21 @@
 # Image Detect
 ## Background
-This application plays a sound and highlight it when it has detected a reference image (`reference.jpg`) in the image that is being scanned.
+This application plays a sound and highlight it when it has detected a reference image (`reference.jpg`) in the image that is being scanned. The application performs a simple screenshot poll to scan the image.
 
 ## Example Usage
-One could detect the following gem in a game on Bejeweled.
+One could detect the following gem in a game of Bejeweled.
 
 ![Reference Image](example/reference.jpg)
 
-![Reference Image](example/matchedExample.jpg)
+![Scanned Image](example/matchedExample.jpg)
 
 ## Setup
 Install Tkinter through normal Python distribution. The other dependencies may be installed through `pip`.
 ```sh
 pip install -r requirements.txt
 ```
+
+The image to be found needs to be at the root folder with name `reference.jpg`. The sound it will play is `beep.wav`. You may replace the image and sound but the names are currently hardcoded.
 
 ## Run
 
@@ -30,6 +32,10 @@ pyinstaller main.py --windowed --onefile
 ```
 
 ## Potential Improvements
+- All error handling.
+    - Reference image.
+    - Sound file.
+- Import reference at run-time.
 - Add mask option to template matching.
 - The image may be matched several times without a padded block out.
 - Adjustments are too coarse.
